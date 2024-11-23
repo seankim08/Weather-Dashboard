@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Search } from 'lucide-react';
 import useWeather from './hooks/useWeather';
 import HourlyForecast from './components/HourlyForecast';
@@ -8,19 +8,67 @@ import './App.css';
 const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [unit, setUnit] = useState('metric');
-  const [lastLocation, setLastLocation] = useState(null);
+  const [lastLocation, setLastLocation] = useState(null); // Store last searched/used location
   const { weather, forecast, isLoading, error, fetchWeatherData } = useWeather();
 
-  // Update the initializeWeather function in App.js
-  const initializeWeather = useCallback(async () => {
-    // We check lastLocation inside the callback
-    if (!lastLocation) {
-      try {
-        if (navigator.geolocation) {
-          const position = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject);
-          });
+  // Only get geolocation once at initial load
+  useEffect(() => {
+    if (!lastLocation) { // Only if no location is stored
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const location = {
+              type: 'coords',
+              value: {
+                lat: position.coords.latitude,
+                lon: position.coords.longitude
+              }
+            };
+            setLastLocation(location);
+            fetchWeatherData(location.value, unit);
+          },
+          (error) => {
+            console.error("Geolocation error:", error);
+            const defaultLocation = { type: 'city', value: 'London' };
+            setLastLocation(defaultLocation);
+            fetchWeatherData(defaultLocation.value, unit);
+          }
+        );
+      } else {
+        const defaultLocation = { type: 'city', value: 'London' };
+        setLastLocation(defaultLocation);
+        fetchWeatherData(defaultLocation.value, unit);
+      }
+    }
+  }, []); // Empty dependency array - only run once
 
+  // Handle unit changes
+  useEffect(() => {
+    if (lastLocation) {
+      fetchWeatherData(lastLocation.value, unit);
+    }
+  }, [unit, lastLocation, fetchWeatherData]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      const newLocation = { type: 'city', value: searchQuery };
+      setLastLocation(newLocation);
+      fetchWeatherData(newLocation.value, unit);
+    }
+  };
+
+  const toggleUnit = () => {
+    const newUnit = unit === 'metric' ? 'imperial' : 'metric';
+    setUnit(newUnit);
+    if (lastLocation) {
+      fetchWeatherData(lastLocation.value, newUnit);
+    }
+  };
+  const handleCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
           const location = {
             type: 'coords',
             value: {
@@ -29,63 +77,14 @@ const App = () => {
             }
           };
           setLastLocation(location);
-          await fetchWeatherData(location.value, unit);
+          fetchWeatherData(location.value, unit);
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
         }
-      } catch (error) {
-        console.error("Geolocation error:", error);
-        const defaultLocation = { type: 'city', value: 'London' };
-        setLastLocation(defaultLocation);
-        await fetchWeatherData(defaultLocation.value, unit);
-      }
+      );
     }
-  }, [fetchWeatherData, unit, lastLocation]); // Add lastLocation to dependencies
-
-  // Initial load effect
-  useEffect(() => {
-    initializeWeather();
-  }, [initializeWeather]);
-
-  // Effect to handle unit changes
-  useEffect(() => {
-    if (lastLocation) {
-      fetchWeatherData(lastLocation.value, unit);
-    }
-  }, [unit, lastLocation, fetchWeatherData]);
-
-  const handleSearch = useCallback((e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      const newLocation = { type: 'city', value: searchQuery };
-      setLastLocation(newLocation);
-      fetchWeatherData(newLocation.value, unit);
-    }
-  }, [searchQuery, unit, fetchWeatherData]);
-
-  const handleCurrentLocation = useCallback(async () => {
-    if (navigator.geolocation) {
-      try {
-        const position = await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject);
-        });
-
-        const location = {
-          type: 'coords',
-          value: {
-            lat: position.coords.latitude,
-            lon: position.coords.longitude
-          }
-        };
-        setLastLocation(location);
-        await fetchWeatherData(location.value, unit);
-      } catch (error) {
-        console.error("Geolocation error:", error);
-      }
-    }
-  }, [fetchWeatherData, unit]);
-
-  const toggleUnit = useCallback(() => {
-    setUnit(prevUnit => prevUnit === 'metric' ? 'imperial' : 'metric');
-  }, []);
+  };
 
   return (
     <div className="container">

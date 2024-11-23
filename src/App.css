@@ -1,38 +1,243 @@
-.App {
-  text-align: center;
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e4d92 0%, #2196f3 100%);
+  color: #333;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+/* Container */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header and Search */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.search-bar {
+  flex: 1;
+  margin-right: 16px;
+  display: flex;
+  gap: 10px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.search-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.search-button, .unit-toggle {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-button:hover, .unit-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Location header */
+.location-header {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Current weather */
+.current-weather {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.current-weather:hover {
+  transform: translateY(-5px);
+}
+
+.weather-main {
+  font-size: 48px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #1e4d92;
+}
+
+.weather-description {
+  margin-bottom: 20px;
+  color: #666;
+  text-transform: capitalize;
+  font-size: 18px;
+}
+
+.weather-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+}
+
+.weather-detail-item {
+  background: rgba(33, 150, 243, 0.1);
+  padding: 15px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.weather-detail-item:hover {
+  background: rgba(33, 150, 243, 0.2);
+  transform: scale(1.02);
+}
+
+/* Forecast container styles */
+.forecast-section {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Add this to contain floating elements */
+}
+
+/* Grid layout for forecast items */
+.hourly-item, .daily-item {
+  display: grid;
+  grid-template-columns: 100px 40px minmax(200px, 1fr) 80px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  position: relative; /* Add this for positioning context */
+}
+
+/* Temperature container */
+.temp-container {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  padding: 0 40px; /* Add padding to prevent overflow */
+  overflow: visible; /* Allow temperature values to be visible */
+}
+
+/* Temperature positioning */
+span[style*="position: absolute"] {
+  transition: left 0.3s ease;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.hourly-item:hover, .daily-item:hover {
+  background: rgba(33, 150, 243, 0.05);
+}
+
+/* Loading state */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: white;
+  font-size: 18px;
+}
+
+/* Error message */
+.error-message {
+  padding: 15px;
+  background: rgba(255, 59, 48, 0.1);
+  border-radius: 15px;
+  color: #ff3b30;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 59, 48, 0.2);
+}
+
+/* Temperature positioning */
+span[style*="position: absolute"] {
+  transition: left 0.3s ease;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .search-bar {
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .weather-details {
+    grid-template-columns: 1fr;
+  }
+
+  .weather-main {
+    font-size: 36px;
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
+/* Animations */
+@keyframes fadeIn {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(20px);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
   }
+}
+
+.current-weather, .forecast-section {
+  animation: fadeIn 0.5s ease-out;
 }
